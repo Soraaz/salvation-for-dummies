@@ -177,7 +177,7 @@ const Solution = ({ language, statues, symbols }) => {
             {step} 5: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[1]} /> {atStatue} <b>{middle}</b>
           </Box>
           <Box>
-            {step} 5: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[2]} /> {atStatue} <b>{right}</b>
+            {step} 6: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[2]} /> {atStatue} <b>{right}</b>
           </Box>
         </>
       );
