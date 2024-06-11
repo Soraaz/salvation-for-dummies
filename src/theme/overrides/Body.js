@@ -6,6 +6,9 @@ export default function Body(theme, darkMode) {
   return {
     MuiCssBaseline: {
       styleOverrides: {
+        a: {
+          color: 'hotpink'
+        },
         body: {
           margin: 0,
           height: '100vh',

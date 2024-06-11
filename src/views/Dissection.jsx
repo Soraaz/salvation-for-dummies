@@ -7,6 +7,16 @@ import { ArcherContainer, ArcherElement } from 'react-archer';
 import CircleIcon from '@mui/icons-material/Circle';
 import SquareIcon from '@mui/icons-material/Square';
 
+const checkForm = (form) => {
+  if (form === 'prism') return ['triangle', 'square'];
+  if (form === 'cone') return ['triangle', 'circle'];
+  if (form === 'cylinder') return ['circle', 'square'];
+  if (form === 'pyramid') return ['triangle', 'triangle'];
+  if (form === 'cube') return ['square', 'square'];
+  if (form === 'sphere') return ['circle', 'circle'];
+  return [];
+};
+
 const StatueIcon = () => <img src={StatueIconPng} alt="Statue" />;
 
 const ViewSymbol = ({ symbol, sx }) => {
@@ -63,34 +73,148 @@ const getOpposite = (symbol) => {
   return null;
 };
 
-const Solution = ({ language, statues, symbols }) => {
+const Solution = ({ language, statues, symbols, forms }) => {
   if (!statues[0] || !statues[1] || !statues[2] || !symbols[0] || !symbols[1] || !symbols[2]) return null;
-  if (symbols[0] === symbols[1] || symbols[0] === symbols[2] || symbols[1] === symbols[2]) return null;
-  if (symbols.find((e) => e === 'prism') && symbols.find((e) => e === 'cone') && symbols.find((e) => e === 'cylinder'))
-    return null;
-  if (symbols.find((e) => e === 'sphere') && symbols.find((e) => e === 'cube') && !symbols.find((e) => e === 'pyramid'))
-    return null;
-  if (symbols.find((e) => e === 'sphere') && symbols.find((e) => e === 'pyramid') && !symbols.find((e) => e === 'cube'))
-    return null;
-  if (symbols.find((e) => e === 'pyramid') && symbols.find((e) => e === 'cube') && !symbols.find((e) => e === 'sphere'))
-    return null;
+  if (forms && forms.total === 8 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2) return 2;
 
-  const resolve = () => {
-    let step4 = null;
-    let step5 = null;
+  const simulate = () => {
+    let start = [checkForm(symbols[0]), checkForm(symbols[1]), checkForm(symbols[2])];
+    const end = [
+      checkForm(getOpposite(statues[0])),
+      checkForm(getOpposite(statues[1])),
+      checkForm(getOpposite(statues[2]))
+    ];
 
-    if (symbols[0] === 'sphere' || symbols[0] === 'cube' || symbols[0] === 'pyramid') step4 = 0;
-    else if (symbols[1] === 'sphere' || symbols[1] === 'cube' || symbols[1] === 'pyramid') step4 = 1;
+    let steps = [];
 
-    if (step4 === 0 && (symbols[1] === 'sphere' || symbols[1] === 'cube' || symbols[1] === 'pyramid')) step5 = 1;
-    return {
-      statues: [getOpposite(statues[0]), getOpposite(statues[1]), getOpposite(statues[2])],
-      step4: step4,
-      step5: step5
+    const calculateWeight = (startTmp, endTmp) => {
+      const symbolsStart = [...startTmp];
+      const symbolsEnd = [...endTmp];
+      let point = 0;
+
+      if (
+        (symbolsStart[0] === 'circle' || symbolsStart[1] === 'circle') &&
+        (symbolsEnd[0] === 'circle' || symbolsEnd[1] === 'circle')
+      ) {
+        point = 1;
+        const index = symbolsEnd.indexOf('circle');
+        symbolsEnd.splice(index, 1);
+        const index2 = symbolsStart.indexOf('circle');
+        symbolsStart.splice(index2, 1);
+      } else if (
+        (symbolsStart[0] === 'triangle' || symbolsStart[1] === 'triangle') &&
+        (symbolsEnd[0] === 'triangle' || symbolsEnd[1] === 'triangle')
+      ) {
+        point = 1;
+        const index = symbolsEnd.indexOf('triangle');
+        symbolsEnd.splice(index, 1);
+        const index2 = symbolsStart.indexOf('triangle');
+        symbolsStart.splice(index2, 1);
+      } else if (
+        (symbolsStart[0] === 'square' || symbolsStart[1] === 'square') &&
+        (symbolsEnd[0] === 'square' || symbolsEnd[1] === 'square')
+      ) {
+        point = 1;
+        const index = symbolsEnd.indexOf('square');
+        symbolsEnd.splice(index, 1);
+        const index2 = symbolsStart.indexOf('square');
+        symbolsStart.splice(index2, 1);
+      }
+
+      if (point) {
+        if (symbolsEnd[0] === symbolsStart[0]) return 2;
+        return 1;
+      }
+      return 0;
     };
+
+    const updateData = (start, end, steps, statues, step1, step2, symbol1, symbol2, indexStart1, indexStart2) => {
+      steps.push({ statue: step1, symbol: symbol1 });
+      steps.push({ statue: step2, symbol: symbol2 });
+
+      const index = start[indexStart1].indexOf(symbol1);
+      const index2 = start[indexStart2].indexOf(symbol2);
+      start[indexStart1][index] = symbol2;
+      start[indexStart2][index2] = symbol1;
+
+      return { start, steps };
+    };
+
+    let i = 0;
+
+    while (
+      (calculateWeight(start[0], end[0]) !== 2 ||
+        calculateWeight(start[1], end[1]) !== 2 ||
+        calculateWeight(start[2], end[2]) !== 2) &&
+      i <= 4
+    ) {
+      const weights = [
+        calculateWeight(start[0], end[0]),
+        calculateWeight(start[1], end[1]),
+        calculateWeight(start[2], end[2])
+      ];
+
+      // 0 WEIGHT
+      if (weights[0] === 0 && weights[1] === 0) {
+        const data = updateData(start, end, steps, statues, 'left', 'middle', statues[0], statues[1], 0, 1);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[0] === 0 && weights[2] === 0) {
+        const data = updateData(start, end, steps, statues, 'left', 'right', statues[0], statues[2], 0, 2);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[1] === 0 && weights[2] === 0) {
+        const data = updateData(start, end, steps, statues, 'middle', 'right', statues[1], statues[2], 1, 2);
+        start = data.start;
+        steps = data.steps;
+      }
+      // 0 WEIGHT with 1
+      else if (weights[0] === 0 && weights[1] <= 1) {
+        const data = updateData(start, end, steps, statues, 'left', 'middle', statues[0], statues[1], 0, 1);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[0] === 0 && weights[2] <= 1) {
+        const data = updateData(start, end, steps, statues, 'left', 'right', statues[0], statues[2], 0, 2);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[1] === 0 && weights[2] <= 1) {
+        const data = updateData(start, end, steps, statues, 'middle', 'right', statues[1], statues[2], 1, 2);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[1] === 0 && weights[0] <= 1) {
+        const data = updateData(start, end, steps, statues, 'middle', 'left', statues[1], statues[0], 1, 0);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[2] === 0 && weights[0] <= 1) {
+        const data = updateData(start, end, steps, statues, 'right', 'left', statues[2], statues[0], 2, 0);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[2] === 0 && weights[1] <= 1) {
+        const data = updateData(start, end, steps, statues, 'right', 'middle', statues[2], statues[1], 2, 1);
+        start = data.start;
+        steps = data.steps;
+      }
+      // 1 WEIGHT
+      else if (weights[0] <= 1 && weights[1] <= 1) {
+        const data = updateData(start, end, steps, statues, 'left', 'middle', statues[0], statues[1], 0, 1);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[0] <= 1 && weights[2] <= 1) {
+        const data = updateData(start, end, steps, statues, 'left', 'right', statues[0], statues[2], 0, 2);
+        start = data.start;
+        steps = data.steps;
+      } else if (weights[1] <= 1 && weights[2] <= 1) {
+        const data = updateData(start, end, steps, statues, 'middle', 'right', statues[1], statues[2], 1, 2);
+        start = data.start;
+        steps = data.steps;
+      }
+      i = i + 1;
+    }
+    if (i >= 4) return null;
+    return { steps, statues: [getOpposite(statues[0]), getOpposite(statues[1]), getOpposite(statues[2])] };
   };
 
-  const solution = resolve();
+  const solution = simulate();
 
   if (!solution)
     return (
@@ -153,53 +277,22 @@ const Solution = ({ language, statues, symbols }) => {
     const right = language === 'us' ? 'RIGHT statue' : 'de DROITE';
     const middle = language === 'us' ? 'MIDDLE statue' : 'du MILLIEU';
 
-    const step4View = () => {
-      if (solution.step4 === null) return null;
-      if (solution.step4 === 0)
-        return (
-          <Box>
-            {step} 4: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[0]} /> {atStatue} <b>{left}</b>
-          </Box>
-        );
-      else
-        return (
-          <Box>
-            {step} 4: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[1]} /> {atStatue} <b>{middle}</b>
-          </Box>
-        );
+    const parseDirection = (direction) => {
+      if (direction === 'left') return left;
+      if (direction === 'right') return right;
+      return middle;
     };
 
-    const step5View = () => {
-      if (solution.step5 === null) return null;
-      return (
-        <>
-          <Box>
-            {step} 5: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[1]} /> {atStatue} <b>{middle}</b>
+    return (
+      <Box sx={{ textAlign: 'left' }}>
+        {solution.steps.map((item, index) => (
+          <Box key={index}>
+            {step} {index}: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={item.symbol} /> {atStatue}{' '}
+            <b>{parseDirection(item.statue)}</b>
           </Box>
-          <Box>
-            {step} 6: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[2]} /> {atStatue} <b>{right}</b>
-          </Box>
-        </>
-      );
-    };
-
-    const beginning = (
-      <Box>
-        <Box>
-          {step} 1: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[0]} /> {atStatue} <b>{left}</b>
-        </Box>
-        <Box>
-          {step} 2: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[1]} /> {atStatue} <b>{middle}</b>
-        </Box>
-        <Box>
-          {step} 3: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={statues[2]} /> {atStatue} <b>{right}</b>
-        </Box>
-        {step4View()}
-        {step5View()}
+        ))}
       </Box>
     );
-
-    return <Box sx={{ textAlign: 'left' }}>{beginning}</Box>;
   };
 
   return (
@@ -232,41 +325,32 @@ const Dissection = ({ language, statues }) => {
     );
   };
 
+  const countForms = () => {
+    let circle = 0;
+    let triangle = 0;
+    let square = 0;
+
+    const form1 = checkForm(symbols[0]);
+    const form2 = checkForm(symbols[1]);
+    const form3 = checkForm(symbols[2]);
+
+    const newForms = [...form1, ...form2, ...form3];
+
+    for (const form of newForms) {
+      if (form === 'circle') circle = circle + 1;
+      if (form === 'square') square = square + 1;
+      if (form === 'triangle') triangle = triangle + 1;
+    }
+
+    return { circle, triangle, square, total: circle + triangle + square };
+  };
+
+  const forms = countForms();
+
   const alert = () => {
     if (!symbols[0] || !symbols[1] || !symbols[2]) return;
-    if (
-      symbols.find((e) => e === 'prism') &&
-      symbols.find((e) => e === 'cone') &&
-      symbols.find((e) => e === 'cylinder')
-    )
+    if (forms && forms.total === 8 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2)
       return errorFormat();
-    if (
-      symbols.find((e) => e === 'sphere') &&
-      symbols.find((e) => e === 'cube') &&
-      !symbols.find((e) => e === 'pyramid')
-    )
-      return errorFormat();
-    if (
-      symbols.find((e) => e === 'sphere') &&
-      symbols.find((e) => e === 'pyramid') &&
-      !symbols.find((e) => e === 'cube')
-    )
-      return errorFormat();
-    if (
-      symbols.find((e) => e === 'pyramid') &&
-      symbols.find((e) => e === 'cube') &&
-      !symbols.find((e) => e === 'sphere')
-    )
-      return errorFormat();
-    if (symbols[0] === symbols[1] || symbols[0] === symbols[2] || symbols[1] === symbols[2])
-      return (
-        <Box sx={{ color: 'red' }}>
-          <br />
-          {language === 'us'
-            ? "WARNING: YOU'VE USED THE SAME SYMBOL TWICE!"
-            : 'ATTENTION: VOUS AVEZ MIS DEUX FOIS LE MEME SYMBOLE !'}
-        </Box>
-      );
   };
 
   return (
@@ -283,7 +367,7 @@ const Dissection = ({ language, statues }) => {
         <Symbol index={2} data={symbols[2]} setData={(value) => setSymbolsIndex(2, value)} />
       </Stack>
       {alert()}
-      <Solution language={language} symbols={symbols} statues={statues} />
+      <Solution language={language} symbols={symbols} statues={statues} forms={forms} />
     </Card>
   );
 };
