@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Card, Grid, Stack, TextField } from '@mui/material';
+import { Box, Button, Card, Grid, Stack, TextField } from '@mui/material';
 import SquareIcon from '@mui/icons-material/Square';
 import CircleIcon from '@mui/icons-material/Circle';
 import IconButton from '@mui/material/IconButton';
@@ -8,7 +8,13 @@ import StatueIconPng from '../assets/statue.png';
 
 const StatueIcon = () => <img src={StatueIconPng} alt="Statue" />;
 
-const Statue = ({ index, data, setData }) => {
+// const isExist = (statues, symbol, index) => {
+//   const indexSymbol = statues.findIndex((item) => item === symbol);
+//
+//   return indexSymbol !== -1 && indexSymbol !== index;
+// };
+
+const Statue = ({ index, data, setData, statues }) => {
   return (
     <Box>
       Statue {index + 1}:
@@ -28,8 +34,8 @@ const Statue = ({ index, data, setData }) => {
   );
 };
 
-const Statues = ({ statues, setStatues, language }) => {
-  const [manualText, setManualText] = useState(undefined);
+const Statues = ({ statues, setStatues, language, reset }) => {
+  const [manualText, setManualText] = useState('');
 
   const formatValue = (newStatues) => {
     const formatStatue = (statue) => {
@@ -47,7 +53,17 @@ const Statues = ({ statues, setStatues, language }) => {
   const changeManualValue = (text) => {
     const newStatues = [null, null, null];
 
-    if (!text) return null;
+    if (!text) {
+      newStatues[0] = null;
+      newStatues[1] = null;
+      newStatues[2] = null;
+
+      setManualText(text);
+      setStatues(newStatues);
+      return null;
+    }
+
+    text = text.toUpperCase();
 
     const formatText = (value) => {
       if (value === 'C' && language === 'us') return 'circle';
@@ -110,21 +126,39 @@ const Statues = ({ statues, setStatues, language }) => {
   };
 
   return (
-    <Card sx={{ p: 1, m: 2, textAlign: 'center' }}>
+    <Card
+      sx={{
+        textAlign: 'center',
+        width: 'fit-content',
+        margin: 'auto',
+        mt: 2,
+        backgroundColor: statues[0] && statues[1] && statues[2] ? 'success.blur' : 'rgba(1,1,1,0.1)'
+      }}
+    >
       <h3>Statues</h3>
-      {language === 'us' ? 'Note the layout of the statues' : 'Note les symboles au dessus de chaque statues'}
+      {language === 'us'
+        ? 'Note the layout of the statues in solo room'
+        : 'Note les symboles au dessus de chaque statues dans la salle solo'}
       <br />
       <br />
       <TextField value={manualText} onChange={(event) => changeManualValue(event.target.value)} />
       <br />
       <br />
       <Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>
-        <Statue index={0} data={statues[0]} setData={(value) => setStatuesIndex(0, value)} />
-        <Statue index={1} data={statues[1]} setData={(value) => setStatuesIndex(1, value)} />
-        <Statue index={2} data={statues[2]} setData={(value) => setStatuesIndex(2, value)} />
+        <Statue index={0} data={statues[0]} setData={(value) => setStatuesIndex(0, value)} statues={statues} />
+        <Statue index={1} data={statues[1]} setData={(value) => setStatuesIndex(1, value)} statues={statues} />
+        <Statue index={2} data={statues[2]} setData={(value) => setStatuesIndex(2, value)} statues={statues} />
       </Stack>
       <br />
       {alert()}
+      <Button
+        onClick={() => {
+          setManualText('');
+          reset();
+        }}
+      >
+        {language === 'us' ? 'Reset' : 'Reinitialiser'}
+      </Button>
     </Card>
   );
 };

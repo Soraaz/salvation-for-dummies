@@ -10,6 +10,7 @@ export default function Body(theme, darkMode) {
           color: 'hotpink'
         },
         body: {
+          overflowX: 'hidden',
           margin: 0,
           height: '100vh',
           width: '100vw',

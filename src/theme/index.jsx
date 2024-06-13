@@ -18,7 +18,17 @@ ThemeConfig.propTypes = {
 export default function ThemeConfig({ children, darkMode }) {
   const themeOptions = {
     typography,
-    palette: { ...paletteDark, mode: 'dark' },
+    palette: {
+      ...paletteDark,
+      mode: 'dark',
+      action: {
+        active: 'rgb(99, 115, 129)',
+        hover: 'rgba(255, 255, 255, 0.08)',
+        selected: 'rgba(255, 255, 255, 0.16)',
+        disabledBackground: 'rgba(255, 255, 255, 0.12)',
+        disabled: 'black'
+      }
+    },
     shape: { borderRadius: 22 }
   };
 

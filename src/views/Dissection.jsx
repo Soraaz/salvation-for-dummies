@@ -1,5 +1,5 @@
 import { Box, Card, Grid, Stack } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import { Icon } from '@iconify/react';
 import StatueIconPng from '../assets/statue.png';
@@ -75,7 +75,7 @@ const getOpposite = (symbol) => {
 
 const Solution = ({ language, statues, symbols, forms }) => {
   if (!statues[0] || !statues[1] || !statues[2] || !symbols[0] || !symbols[1] || !symbols[2]) return null;
-  if (forms && forms.total === 8 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2) return 2;
+  if (forms && forms.total !== 6 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2) return null;
 
   const simulate = () => {
     let start = [checkForm(symbols[0]), checkForm(symbols[1]), checkForm(symbols[2])];
@@ -129,6 +129,11 @@ const Solution = ({ language, statues, symbols, forms }) => {
     };
 
     const updateData = (start, end, steps, statues, step1, step2, symbol1, symbol2, indexStart1, indexStart2) => {
+      if (start[indexStart1][0] === start[indexStart1][1] && start[indexStart1][0] !== symbol1)
+        symbol1 = start[indexStart1][0];
+      if (start[indexStart2][0] === start[indexStart2][1] && start[indexStart2][0] !== symbol2)
+        symbol2 = start[indexStart2][0];
+
       steps.push({ statue: step1, symbol: symbol1 });
       steps.push({ statue: step2, symbol: symbol2 });
 
@@ -285,12 +290,18 @@ const Solution = ({ language, statues, symbols, forms }) => {
 
     return (
       <Box sx={{ textAlign: 'left' }}>
-        {solution.steps.map((item, index) => (
-          <Box key={index}>
-            {step} {index}: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={item.symbol} /> {atStatue}{' '}
-            <b>{parseDirection(item.statue)}</b>
-          </Box>
-        ))}
+        {solution.steps
+          .map((item, index) => ({ ...item, index: index }))
+          .sort((a, b) => {
+            if (b.index !== 0 && b.symbol === solution.steps[b.index - 1].symbol) return b.index - a.index;
+            return a.index - b.index;
+          })
+          .map((item, index) => (
+            <Box key={index}>
+              {step} {index + 1}: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={item.symbol} /> {atStatue}{' '}
+              <b>{parseDirection(item.statue)}</b>
+            </Box>
+          ))}
       </Box>
     );
   };
@@ -305,8 +316,12 @@ const Solution = ({ language, statues, symbols, forms }) => {
   );
 };
 
-const Dissection = ({ language, statues }) => {
+const Dissection = ({ language, statues, resetValue }) => {
   const [symbols, setSymbols] = useState([null, null, null]);
+
+  useEffect(() => {
+    if (resetValue) setSymbols([null, null, null]);
+  }, [resetValue]);
 
   const setSymbolsIndex = (index, value) => {
     const newSymbols = [...symbols];
@@ -349,12 +364,12 @@ const Dissection = ({ language, statues }) => {
 
   const alert = () => {
     if (!symbols[0] || !symbols[1] || !symbols[2]) return;
-    if (forms && forms.total === 8 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2)
+    if (forms && forms.total !== 6 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2)
       return errorFormat();
   };
 
   return (
-    <Card sx={{ p: 1, m: 2, textAlign: 'center' }}>
+    <Card sx={{ textAlign: 'center', width: 'fit-content', margin: 'auto', mt: 2 }}>
       <h3>{language === 'us' ? 'Dissection Room' : 'Salle de dissection'}</h3>
       {language === 'us'
         ? 'Name the 3 geometric shapes you see on the statues'

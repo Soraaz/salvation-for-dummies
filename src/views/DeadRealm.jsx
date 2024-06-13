@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import CircleIcon from '@mui/icons-material/Circle';
 import { Icon } from '@iconify/react';
 import SquareIcon from '@mui/icons-material/Square';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import StatueIconPng from '../assets/statue.png';
 import { ArcherContainer, ArcherElement } from 'react-archer';
 
@@ -15,17 +15,57 @@ const ViewSymbol = ({ symbol, sx }) => {
   if (symbol === 'square') return <SquareIcon sx={sx} height={25} />;
 };
 
-const Solution = ({ statues, symbols, your, language }) => {
+const Solution = ({ statues, symbols, your, language, needAnotherPlayer, your2, symbols2 }) => {
   if (!statues[0] || !statues[1] || !statues[2] || !symbols[0] || !symbols[1] || !your) return null;
+  if (needAnotherPlayer && (!symbols2[0] || !symbols2[1] || !your2)) return null;
+
+  const countForms = () => {
+    let circle = 0;
+    let triangle = 0;
+    let square = 0;
+
+    const newForms = [symbols[0], symbols[1], symbols2[0], symbols2[1]];
+
+    for (const form of newForms) {
+      if (form === 'circle') circle = circle + 1;
+      if (form === 'square') square = square + 1;
+      if (form === 'triangle') triangle = triangle + 1;
+    }
+
+    return { circle, triangle, square, total: circle + triangle + square };
+  };
+
+  const forms = countForms();
 
   const resolve = () => {
     if (statues[0] === statues[1] || statues[0] === statues[2] || statues[1] === statues[2]) return null;
+    if (forms.circle > 2 || forms.triangle > 2 || forms.square > 2) return null;
     // CAS FACILE DOUBLE SYMBOLE
     if (symbols[0] === symbols[1] && symbols[0] === your) {
       if (statues[0] === your) return { 1: { to: your, from: statues[1] }, 2: { to: your, from: statues[2] } };
       if (statues[1] === your) return { 1: { to: your, from: statues[0] }, 2: { to: your, from: statues[2] } };
       if (statues[2] === your) return { 1: { to: your, from: statues[0] }, 2: { to: your, from: statues[1] } };
     }
+    // CAS UNIQUE TRIANGULAIRE
+    if (needAnotherPlayer) {
+      if (
+        !(
+          (symbols2[0] === symbols2[1] && symbols2[0] === your2) ||
+          (symbols[0] === symbols2[0] && symbols[1] === symbols2[1]) ||
+          (symbols[0] === symbols2[1] && symbols[1] === symbols2[0])
+        )
+      ) {
+        if (statues[0] !== symbols[0] && statues[0] !== symbols[1])
+          return { 1: { to: symbols[0], from: statues[0] }, 2: { to: symbols[1], from: statues[0] } };
+        if (statues[1] !== symbols[0] && statues[1] !== symbols[1])
+          return { 1: { to: symbols[0], from: statues[1] }, 2: { to: symbols[1], from: statues[1] } };
+        if (statues[2] !== symbols[0] && statues[2] !== symbols[1])
+          return { 1: { to: symbols[0], from: statues[2] }, 2: { to: symbols[1], from: statues[2] } };
+      }
+      if (your === your2) return null;
+    }
+
+    // ALGO CLASSIQUE
     if (symbols[0] === your) {
       if (statues[0] === your) {
         if (statues[1] === symbols[1])
@@ -268,11 +308,10 @@ const Solution = ({ statues, symbols, your, language }) => {
   );
 };
 
-const Symbol = ({ special, language, index, data, setData }) => {
+const Symbol = ({ special, language, index, data, setData, isAnotherPlayer, disabledSymbol }) => {
   const formatText = () => {
-    if (special) {
-      return <Box>{language === 'us' ? 'YOUR STATUE SYMBOL:' : 'SYMBOLE DE VOTRE STATUE:'}</Box>;
-    }
+    if (special && isAnotherPlayer) return <Box>{language === 'us' ? 'Statue:' : 'Statue:'}</Box>;
+    if (special) return <Box>{language === 'us' ? 'Statue:' : 'Statue:'}</Box>;
 
     return (
       <>
@@ -287,23 +326,47 @@ const Symbol = ({ special, language, index, data, setData }) => {
     <Box>
       {formatText()}
       <Box>
-        <IconButton onClick={() => setData('circle')} sx={{ color: data === 'circle' ? color : null }}>
+        <IconButton
+          onClick={() => setData('circle')}
+          sx={{ color: data === 'circle' ? color : null }}
+          disabled={disabledSymbol === 'circle'}
+        >
           <CircleIcon />
         </IconButton>
-        <IconButton onClick={() => setData('triangle')} sx={{ color: data === 'triangle' ? color : null }}>
+        <IconButton
+          onClick={() => setData('triangle')}
+          sx={{ color: data === 'triangle' ? color : null }}
+          disabled={disabledSymbol === 'triangle'}
+        >
           <Icon icon="mdi:triangle" />
         </IconButton>
-        <IconButton onClick={() => setData('square')} sx={{ color: data === 'square' ? color : null }}>
+        <IconButton
+          onClick={() => setData('square')}
+          sx={{ color: data === 'square' ? color : null }}
+          disabled={disabledSymbol === 'square'}
+        >
           <SquareIcon />
         </IconButton>
       </Box>
+      {special && <StatueIcon />}
     </Box>
   );
 };
 
-const DeadRealm = ({ language, statues }) => {
+const DeadRealm = ({ language, statues, resetValue }) => {
   const [symbols, setSymbols] = useState([null, null]);
   const [your, setYour] = useState(null);
+  const [symbols2, setSymbols2] = useState([null, null]);
+  const [your2, setYour2] = useState(null);
+
+  useEffect(() => {
+    if (resetValue) {
+      setSymbols([null, null]);
+      setYour(null);
+      setSymbols2([null, null]);
+      setYour2(null);
+    }
+  }, [resetValue]);
 
   const setSymbolsIndex = (index, value) => {
     const newSymbols = [...symbols];
@@ -311,7 +374,13 @@ const DeadRealm = ({ language, statues }) => {
     setSymbols(newSymbols);
   };
 
-  const alert = () => {
+  const setSymbolsIndex2 = (index, value) => {
+    const newSymbols = [...symbols2];
+    newSymbols[index] = value;
+    setSymbols2(newSymbols);
+  };
+
+  const alert = (symbols, your) => {
     if (!your || !symbols[0] || !symbols[1]) return;
     if (your !== symbols[0] && your !== symbols[1])
       return (
@@ -324,21 +393,83 @@ const DeadRealm = ({ language, statues }) => {
       );
   };
 
+  const newPlayer = () => {
+    return (
+      <Box>
+        <hr />
+        <Box sx={{ color: 'yellow' }}>
+          {language === 'us'
+            ? 'The same information should be noted for another player in a solo room.'
+            : 'Il faut noter les mêmes informations pour un autre joueur dans une salle solo'}
+        </Box>
+        <br />
+        <Grid item container>
+          <Grid item md={4}>
+            <Symbol
+              special
+              isAnotherPlayer
+              language={language}
+              data={your2}
+              setData={(value) => setYour2(value)}
+              disabledSymbol={your}
+            />
+          </Grid>
+          <Grid item md={4}>
+            <Symbol language={language} index={0} data={symbols2[0]} setData={(value) => setSymbolsIndex2(0, value)} />
+          </Grid>
+          <Grid item md={4}>
+            <Symbol language={language} index={1} data={symbols2[1]} setData={(value) => setSymbolsIndex2(1, value)} />
+          </Grid>
+        </Grid>
+        {/*<Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>*/}
+        {/*  <Symbol special isAnotherPlayer language={language} data={your2} setData={(value) => setYour2(value)} />*/}
+        {/*  <Symbol language={language} index={0} data={symbols2[0]} setData={(value) => setSymbolsIndex2(0, value)} />*/}
+        {/*  <Symbol language={language} index={1} data={symbols2[1]} setData={(value) => setSymbolsIndex2(1, value)} />*/}
+        {/*</Stack>*/}
+        {alert(symbols2, your2)}
+      </Box>
+    );
+  };
+
+  let needAnotherPlayer = false;
+
+  if (symbols[0] && symbols[1] && symbols[0] !== symbols[1]) needAnotherPlayer = true;
+
   return (
-    <Card sx={{ p: 1, m: 2, textAlign: 'center' }}>
+    <Card sx={{ textAlign: 'center', width: 'fit-content', margin: 'auto', mt: 2 }}>
       <h3>{language === 'us' ? 'Solo Room' : 'Salle solo'}</h3>
       {language === 'us'
         ? 'Choose the symbol for YOUR STATUE and the two symbols you see on the wall at the back of the room'
         : 'Choisissez le symbole de VOTRE STATUE et les deux symboles que vous voyez sur le mur du fond de la salle'}
       <br />
       <br />
-      <Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>
-        <Symbol special language={language} data={your} setData={(value) => setYour(value)} />
-        <Symbol language={language} index={0} data={symbols[0]} setData={(value) => setSymbolsIndex(0, value)} />
-        <Symbol language={language} index={1} data={symbols[1]} setData={(value) => setSymbolsIndex(1, value)} />
-      </Stack>
-      {alert()}
-      <Solution language={language} symbols={symbols} statues={statues} your={your} />
+      <Grid item container>
+        <Grid item md={4}>
+          <Symbol special language={language} data={your} setData={(value) => setYour(value)} />
+        </Grid>
+        <Grid item md={4}>
+          <Symbol language={language} index={0} data={symbols[0]} setData={(value) => setSymbolsIndex(0, value)} />
+        </Grid>
+        <Grid item md={4}>
+          <Symbol language={language} index={1} data={symbols[1]} setData={(value) => setSymbolsIndex(1, value)} />
+        </Grid>
+      </Grid>
+      {/*<Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>*/}
+      {/*  <Symbol special language={language} data={your} setData={(value) => setYour(value)} />*/}
+      {/*  <Symbol language={language} index={0} data={symbols[0]} setData={(value) => setSymbolsIndex(0, value)} />*/}
+      {/*  <Symbol language={language} index={1} data={symbols[1]} setData={(value) => setSymbolsIndex(1, value)} />*/}
+      {/*</Stack>*/}
+      {alert(symbols, your)}
+      {needAnotherPlayer && newPlayer()}
+      <Solution
+        needAnotherPlayer={needAnotherPlayer}
+        language={language}
+        symbols={symbols}
+        statues={statues}
+        your={your}
+        symbols2={symbols2}
+        your2={your2}
+      />
     </Card>
   );
 };
