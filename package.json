@@ -40,7 +40,7 @@
   },
   "scripts": {
     "start": "vite --port 3000",
-    "build": "vite build"
+    "build": "node generateBuild.js && vite build"
   },
   "eslintConfig": {
     "extends": [

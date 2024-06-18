@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Card, Grid, Stack, TextField } from '@mui/material';
+import { Box, Button, Card, Grid, TextField, useMediaQuery, useTheme } from '@mui/material';
 import SquareIcon from '@mui/icons-material/Square';
 import CircleIcon from '@mui/icons-material/Circle';
 import IconButton from '@mui/material/IconButton';
@@ -8,34 +8,57 @@ import StatueIconPng from '../assets/statue.png';
 
 const StatueIcon = () => <img src={StatueIconPng} alt="Statue" />;
 
-// const isExist = (statues, symbol, index) => {
-//   const indexSymbol = statues.findIndex((item) => item === symbol);
-//
-//   return indexSymbol !== -1 && indexSymbol !== index;
-// };
-
 const Statue = ({ index, data, setData, statues }) => {
+  const isMobile = !useMediaQuery('(min-width:1200px)');
+
+  const iconInputSelect = (input, data) => {
+    if (input === data) return setData(null);
+    setData(input);
+  };
+
   return (
     <Box>
       Statue {index + 1}:
       <Box>
-        <IconButton onClick={() => setData('circle')} sx={{ color: data === 'circle' ? '#880202' : null }}>
-          <CircleIcon />
-        </IconButton>
-        <IconButton onClick={() => setData('triangle')} sx={{ color: data === 'triangle' ? '#880202' : null }}>
-          <Icon icon="mdi:triangle" />
-        </IconButton>
-        <IconButton onClick={() => setData('square')} sx={{ color: data === 'square' ? '#880202' : null }}>
-          <SquareIcon />
-        </IconButton>
+        {(!data || (data && data === 'circle')) && (
+          <IconButton
+            onClick={() => iconInputSelect('circle', data)}
+            sx={{ color: data === 'circle' ? '#880202' : null }}
+            disabled={statues.find((item) => item === 'circle') && data !== 'circle'}
+          >
+            <CircleIcon sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'triangle')) && (
+          <IconButton
+            onClick={() => iconInputSelect('triangle', data)}
+            sx={{ color: data === 'triangle' ? '#880202' : null }}
+            disabled={statues.find((item) => item === 'triangle') && data !== 'triangle'}
+          >
+            <Icon icon="mdi:triangle" style={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'square')) && (
+          <IconButton
+            onClick={() => iconInputSelect('square', data)}
+            sx={{ color: data === 'square' ? '#880202' : null }}
+            disabled={statues.find((item) => item === 'square') && data !== 'square'}
+          >
+            <SquareIcon sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
       </Box>
       <StatueIcon />
     </Box>
   );
 };
 
-const Statues = ({ statues, setStatues, language, reset }) => {
+const Statues = ({ statues, setStatues, language, resetValue }) => {
   const [manualText, setManualText] = useState('');
+
+  useEffect(() => {
+    if (resetValue) setManualText('');
+  }, [resetValue]);
 
   const formatValue = (newStatues) => {
     const formatStatue = (statue) => {
@@ -65,6 +88,21 @@ const Statues = ({ statues, setStatues, language, reset }) => {
 
     text = text.toUpperCase();
 
+    const hasDuplicateChar = (str) => {
+      const charSet = new Set();
+
+      for (let char of str) {
+        if (charSet.has(char)) {
+          return true;
+        }
+        charSet.add(char);
+      }
+
+      return false;
+    };
+
+    if (hasDuplicateChar(text)) return null;
+
     const formatText = (value) => {
       if (value === 'C' && language === 'us') return 'circle';
       if (value === 'T' && language === 'us') return 'triangle';
@@ -79,19 +117,44 @@ const Statues = ({ statues, setStatues, language, reset }) => {
     if (text.length >= 2) newStatues[1] = formatText(text[1]);
     if (text.length >= 3) newStatues[2] = formatText(text[2]);
 
-    setManualText(text);
-    setStatues(newStatues);
+    if (manualText.length === 1) {
+      const indexAdd = newStatues.findIndex((item) => item === null);
+
+      if (newStatues.find((item) => item === 'circle') && newStatues.find((item) => item === 'triangle'))
+        newStatues[indexAdd] = 'square';
+      else if (newStatues.find((item) => item === 'circle') && newStatues.find((item) => item === 'square'))
+        newStatues[indexAdd] = 'triangle';
+      else if (newStatues.find((item) => item === 'square') && newStatues.find((item) => item === 'triangle'))
+        newStatues[indexAdd] = 'circle';
+      formatValue(newStatues);
+      setStatues(newStatues);
+    } else {
+      setManualText(text);
+      setStatues(newStatues);
+    }
   };
 
   const setStatuesIndex = (index, value) => {
     const newStatues = [...statues];
     newStatues[index] = value;
+
+    if (newStatues.filter((x) => x === null).length === 1 && value !== null) {
+      const indexAdd = newStatues.findIndex((item) => item === null);
+
+      if (newStatues.find((item) => item === 'circle') && newStatues.find((item) => item === 'triangle'))
+        newStatues[indexAdd] = 'square';
+      else if (newStatues.find((item) => item === 'circle') && newStatues.find((item) => item === 'square'))
+        newStatues[indexAdd] = 'triangle';
+      else if (newStatues.find((item) => item === 'square') && newStatues.find((item) => item === 'triangle'))
+        newStatues[indexAdd] = 'circle';
+    }
     formatValue(newStatues);
     setStatues(newStatues);
   };
 
   const updateText = (text) => {
     if (!text) return null;
+
     const formatText = (value) => {
       if (value === 'C' && language === 'fr') return 'R';
       if (value === 'R' && language === 'us') return 'C';
@@ -129,8 +192,8 @@ const Statues = ({ statues, setStatues, language, reset }) => {
     <Card
       sx={{
         textAlign: 'center',
-        width: 'fit-content',
         margin: 'auto',
+        width: '100%',
         mt: 2,
         backgroundColor: statues[0] && statues[1] && statues[2] ? 'success.blur' : 'rgba(1,1,1,0.1)'
       }}
@@ -144,21 +207,19 @@ const Statues = ({ statues, setStatues, language, reset }) => {
       <TextField value={manualText} onChange={(event) => changeManualValue(event.target.value)} />
       <br />
       <br />
-      <Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>
-        <Statue index={0} data={statues[0]} setData={(value) => setStatuesIndex(0, value)} statues={statues} />
-        <Statue index={1} data={statues[1]} setData={(value) => setStatuesIndex(1, value)} statues={statues} />
-        <Statue index={2} data={statues[2]} setData={(value) => setStatuesIndex(2, value)} statues={statues} />
-      </Stack>
+      <Grid item container spacing={2} sx={{ justifyContent: 'center' }}>
+        <Grid item md={4}>
+          <Statue index={0} data={statues[0]} setData={(value) => setStatuesIndex(0, value)} statues={statues} />
+        </Grid>
+        <Grid item md={4}>
+          <Statue index={1} data={statues[1]} setData={(value) => setStatuesIndex(1, value)} statues={statues} />
+        </Grid>
+        <Grid item md={4}>
+          <Statue index={2} data={statues[2]} setData={(value) => setStatuesIndex(2, value)} statues={statues} />
+        </Grid>
+      </Grid>
       <br />
       {alert()}
-      <Button
-        onClick={() => {
-          setManualText('');
-          reset();
-        }}
-      >
-        {language === 'us' ? 'Reset' : 'Reinitialiser'}
-      </Button>
     </Card>
   );
 };

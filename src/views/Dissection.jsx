@@ -1,9 +1,8 @@
-import { Box, Card, Grid, Stack } from '@mui/material';
+import { Box, Card, Grid, Stack, TextField, useMediaQuery } from '@mui/material';
 import { useEffect, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import { Icon } from '@iconify/react';
 import StatueIconPng from '../assets/statue.png';
-import { ArcherContainer, ArcherElement } from 'react-archer';
 import CircleIcon from '@mui/icons-material/Circle';
 import SquareIcon from '@mui/icons-material/Square';
 
@@ -17,51 +16,112 @@ const checkForm = (form) => {
   return [];
 };
 
-const StatueIcon = () => <img src={StatueIconPng} alt="Statue" />;
-
-const ViewSymbol = ({ symbol, sx }) => {
-  if (symbol === 'cylinder') return <Icon icon="mdi:cylinder" style={sx} height={25} />;
-  if (symbol === 'cone') return <Icon icon="mdi:cone" style={sx} height={25} />;
-  if (symbol === 'prism') return <Icon icon="tabler:prism" style={sx} height={25} />;
-  if (symbol === 'pyramid') return <Icon icon="mdi:pyramid" style={sx} height={25} />;
-  if (symbol === 'sphere') return <Icon icon="mdi:sphere" style={sx} height={25} />;
-  if (symbol === 'cube') return <Icon icon="mdi:cube-outline" style={sx} height={25} />;
-  if (symbol === 'circle') return <CircleIcon sx={sx} height={25} />;
-  if (symbol === 'triangle') return <Icon icon="mdi:triangle" style={sx} height={25} />;
-  if (symbol === 'square') return <SquareIcon sx={sx} height={25} />;
+const checkForm3d = (form) => {
+  if (form.includes('triangle') && form.includes('square')) return 'prism';
+  if (form.includes('triangle') && form.includes('circle')) return 'cone';
+  if (form.includes('circle') && form.includes('square')) return 'cylinder';
+  if (form.includes('triangle')) return 'pyramid';
+  if (form.includes('square')) return 'cube';
+  if (form.includes('circle')) return 'sphere';
   return null;
 };
 
-const Symbol = ({ index, data, setData }) => {
+const StatueIcon = () => <img src={StatueIconPng} alt="Statue" />;
+
+const ViewSymbol = ({ symbol, sx = { height: 25 } }) => {
+  if (symbol === 'cylinder') return <Icon icon="mdi:cylinder" style={sx} />;
+  if (symbol === 'cone') return <Icon icon="mdi:cone" style={sx} />;
+  if (symbol === 'prism') return <Icon icon="tabler:prism" style={sx} />;
+  if (symbol === 'pyramid') return <Icon icon="mdi:pyramid" style={sx} />;
+  if (symbol === 'sphere') return <Icon icon="mdi:sphere" style={sx} />;
+  if (symbol === 'cube') return <Icon icon="mdi:cube-outline" style={sx} />;
+  if (symbol === 'circle') return <CircleIcon sx={sx} />;
+  if (symbol === 'triangle') return <Icon icon="mdi:triangle" style={sx} height={sx.height} />;
+  if (symbol === 'square') return <SquareIcon sx={sx} />;
+  return null;
+};
+
+const Symbol = ({ index, data, setData, forms, pseudo, setPseudo, triumphMode }) => {
+  const isMobile = !useMediaQuery('(min-width:1200px)');
   const formatText = () => {
     return <>Statue {index + 1}:</>;
+  };
+
+  const iconInputSelect = (input, data) => {
+    if (input === data) return setData(null);
+    setData(input);
+  };
+
+  const checkDisable = (input) => {
+    if (input === data) return false;
+    const deconstruct = checkForm(input);
+
+    if (deconstruct[0] === deconstruct[1]) return forms[deconstruct[0]] + 2 > 2;
+    return forms[deconstruct[0]] + 1 > 2 || forms[deconstruct[1]] + 1 > 2;
   };
 
   return (
     <Box>
       {formatText()}
       <Box>
-        <IconButton onClick={() => setData('cube')} sx={{ color: data === 'cube' ? '#880202' : null }}>
-          <ViewSymbol symbol={'cube'} />
-        </IconButton>
-        <IconButton onClick={() => setData('sphere')} sx={{ color: data === 'sphere' ? '#880202' : null }}>
-          <ViewSymbol symbol={'sphere'} />
-        </IconButton>
-        <IconButton onClick={() => setData('pyramid')} sx={{ color: data === 'pyramid' ? '#880202' : null }}>
-          <ViewSymbol symbol={'pyramid'} />
-        </IconButton>
-        <br />
-        <IconButton onClick={() => setData('cylinder')} sx={{ color: data === 'cylinder' ? '#880202' : null }}>
-          <ViewSymbol symbol={'cylinder'} />
-        </IconButton>
-        <IconButton onClick={() => setData('prism')} sx={{ color: data === 'prism' ? '#880202' : null }}>
-          <ViewSymbol symbol={'prism'} />
-        </IconButton>
-        <IconButton onClick={() => setData('cone')} sx={{ color: data === 'cone' ? '#880202' : null }}>
-          <ViewSymbol symbol={'cone'} />
-        </IconButton>
+        {(!data || (data && data === 'cube')) && (
+          <IconButton
+            disabled={checkDisable('cube')}
+            onClick={() => iconInputSelect('cube', data)}
+            sx={{ color: data === 'cube' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'cube'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'sphere')) && (
+          <IconButton
+            disabled={checkDisable('sphere')}
+            onClick={() => iconInputSelect('sphere', data)}
+            sx={{ color: data === 'sphere' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'sphere'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'pyramid')) && (
+          <IconButton
+            disabled={checkDisable('pyramid')}
+            onClick={() => iconInputSelect('pyramid', data)}
+            sx={{ color: data === 'pyramid' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'pyramid'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {!data && <br />}
+        {(!data || (data && data === 'cylinder')) && (
+          <IconButton
+            disabled={checkDisable('cylinder')}
+            onClick={() => iconInputSelect('cylinder', data)}
+            sx={{ color: data === 'cylinder' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'cylinder'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'prism')) && (
+          <IconButton
+            disabled={checkDisable('prism')}
+            onClick={() => iconInputSelect('prism', data)}
+            sx={{ color: data === 'prism' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'prism'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
+        {(!data || (data && data === 'cone')) && (
+          <IconButton
+            disabled={checkDisable('cone')}
+            onClick={() => iconInputSelect('cone', data)}
+            sx={{ color: data === 'cone' ? '#880202' : null }}
+          >
+            <ViewSymbol symbol={'cone'} sx={{ fontSize: isMobile ? '14px' : '24px' }} />
+          </IconButton>
+        )}
       </Box>
       <StatueIcon />
+      {triumphMode && <TextField value={pseudo} onChange={setPseudo} label={'Pseudo'} sx={{ mt: 2 }} />}
     </Box>
   );
 };
@@ -73,9 +133,41 @@ const getOpposite = (symbol) => {
   return null;
 };
 
-const Solution = ({ language, statues, symbols, forms }) => {
-  if (!statues[0] || !statues[1] || !statues[2] || !symbols[0] || !symbols[1] || !symbols[2]) return null;
-  if (forms && forms.total !== 6 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2) return null;
+const Solution = ({ language, statues, symbols, forms, triumphMode, setTriumphModeData, pseudos }) => {
+  const [solution, setSolution] = useState(null);
+
+  useEffect(() => {
+    if (triumphMode) {
+      setTriumphModeData({ solution: solution, pseudos: pseudos });
+    }
+  }, [triumphMode]);
+
+  useEffect(() => {
+    if (triumphMode) {
+      setTriumphModeData({ solution: solution, pseudos: pseudos });
+    }
+  }, [solution, pseudos]);
+
+  useEffect(() => {
+    if (!statues[0] || !statues[1] || !statues[2] || !symbols[0] || !symbols[1] || !symbols[2]) {
+      if (solution === null) return;
+      return setSolution(null);
+    }
+    if (forms && forms.total !== 6 && forms.circle !== 2 && forms.square !== 2 && forms.triangle !== 2) {
+      if (solution === null) return;
+      return setSolution(null);
+    }
+    if (triumphMode && (pseudos[0] === '' || pseudos[1] === '' || pseudos[2] === '')) {
+      if (solution === null) return;
+      return setSolution(null);
+    }
+
+    if (solution === null) {
+      const sol = simulate();
+      setSolution(sol);
+      setTriumphModeData({ solution: sol, pseudos: pseudos });
+    }
+  }, [statues, symbols, forms, pseudos]);
 
   const simulate = () => {
     let start = [checkForm(symbols[0]), checkForm(symbols[1]), checkForm(symbols[2])];
@@ -216,43 +308,50 @@ const Solution = ({ language, statues, symbols, forms }) => {
       i = i + 1;
     }
     if (i >= 4) return null;
+
     return { steps, statues: [getOpposite(statues[0]), getOpposite(statues[1]), getOpposite(statues[2])] };
   };
 
-  const solution = simulate();
-
-  if (!solution)
-    return (
-      <Box sx={{ color: 'red' }}>
-        <br />
-        {language === 'us'
-          ? 'ERROR: One of the given information is erroneous! Check your symbols!'
-          : 'ERREUR: Une des infos donnée est erroné ! Vérifier vos symboles !'}
-      </Box>
-    );
+  if (!solution) return null;
+  // return (
+  //   <Box sx={{ color: 'red' }}>
+  //     <br />
+  //     {language === 'us'
+  //       ? 'ERROR: One of the given information is erroneous! Check your symbols!'
+  //       : 'ERREUR: Une des infos donnée est erroné ! Vérifier vos symboles !'}
+  //   </Box>
+  // );
 
   const PaintSolution = () => {
+    const isMobile = !useMediaQuery('(min-width:1200px)');
+
     return (
       <Box sx={{ border: '5px solid #ff6550', p: 4 }}>
         <Grid container>
           <Grid container item xs={12}>
-            <Grid item md={4}></Grid>
-            <Grid item md={4}></Grid>
-            <Grid item md={4}></Grid>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
           </Grid>
           <Grid container item xs={12}>
-            <Grid item md={4}>
+            <Grid item md={4} sx={{ width: '33%' }}>
               <Box>
-                <ViewSymbol symbol={solution.statues[0]} sx={{ color: '#880202' }} />
+                <ViewSymbol
+                  symbol={solution.statues[0]}
+                  sx={{ color: '#880202', fontSize: isMobile ? '14px' : '24px' }}
+                />
                 <br />
                 <StatueIcon />
                 <br />
               </Box>
             </Grid>
-            <Grid item md={4}></Grid>
-            <Grid item md={4}>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
+            <Grid item md={4} sx={{ width: '33%' }}>
               <Box>
-                <ViewSymbol symbol={solution.statues[2]} sx={{ color: '#880202' }} />
+                <ViewSymbol
+                  symbol={solution.statues[2]}
+                  sx={{ color: '#880202', fontSize: isMobile ? '14px' : '24px' }}
+                />
                 <br />
                 <StatueIcon />
                 <br />
@@ -260,14 +359,19 @@ const Solution = ({ language, statues, symbols, forms }) => {
             </Grid>
           </Grid>
           <Grid container item xs={12}>
-            <Grid item md={12}>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
+            <Grid item md={4} sx={{ width: '33%' }}>
               <Box>
-                <ViewSymbol symbol={solution.statues[1]} sx={{ color: '#880202' }} />
+                <ViewSymbol
+                  symbol={solution.statues[1]}
+                  sx={{ color: '#880202', fontSize: isMobile ? '14px' : '24px' }}
+                />
                 <br />
                 <StatueIcon />
                 <br />
               </Box>
             </Grid>
+            <Grid item md={4} sx={{ width: '33%' }}></Grid>
           </Grid>
         </Grid>
       </Box>
@@ -294,17 +398,24 @@ const Solution = ({ language, statues, symbols, forms }) => {
           .map((item, index) => ({ ...item, index: index }))
           .sort((a, b) => {
             if (b.index !== 0 && b.symbol === solution.steps[b.index - 1].symbol) return b.index - a.index;
+            if (
+              b.index === 2 &&
+              (b.symbol === solution.steps[b.index - 1].symbol || b.symbol === solution.steps[b.index - 2].symbol)
+            )
+              return b.index - a.index;
             return a.index - b.index;
           })
           .map((item, index) => (
             <Box key={index}>
-              {step} {index + 1}: {dunk} <ViewSymbol sx={{ color: 'green' }} symbol={item.symbol} /> {atStatue}{' '}
-              <b>{parseDirection(item.statue)}</b>
+              {step} {index + 1}: {dunk} <ViewSymbol sx={{ color: 'green', fontSize: '24px' }} symbol={item.symbol} />{' '}
+              {atStatue} <b>{parseDirection(item.statue)}</b>
             </Box>
           ))}
       </Box>
     );
   };
+
+  if (triumphMode) return null;
 
   return (
     <Box>
@@ -316,31 +427,18 @@ const Solution = ({ language, statues, symbols, forms }) => {
   );
 };
 
-const Dissection = ({ language, statues, resetValue }) => {
+const Dissection = ({ language, statues, resetValue, triumphMode, setTriumphModeData }) => {
   const [symbols, setSymbols] = useState([null, null, null]);
+  const [pseudos, setPseudos] = useState(['', '', '']);
 
   useEffect(() => {
-    if (resetValue) setSymbols([null, null, null]);
+    if (resetValue) {
+      setSymbols([null, null, null]);
+      setPseudos(['', '', '']);
+    }
   }, [resetValue]);
 
-  const setSymbolsIndex = (index, value) => {
-    const newSymbols = [...symbols];
-    newSymbols[index] = value;
-    setSymbols(newSymbols);
-  };
-
-  const errorFormat = () => {
-    return (
-      <Box sx={{ color: 'red' }}>
-        <br />
-        {language === 'us'
-          ? 'WARNING: YOUR CONFIGURATION IS NOT POSSIBLE !'
-          : "ATTENTION: VOTRE CONFIGURATION N'EST PAS POSSIBLE !"}
-      </Box>
-    );
-  };
-
-  const countForms = () => {
+  const countForms = (symbols) => {
     let circle = 0;
     let triangle = 0;
     let square = 0;
@@ -360,7 +458,51 @@ const Dissection = ({ language, statues, resetValue }) => {
     return { circle, triangle, square, total: circle + triangle + square };
   };
 
-  const forms = countForms();
+  const setSymbolsIndex = (index, value) => {
+    const newSymbols = [...symbols];
+    newSymbols[index] = value;
+
+    if (newSymbols.filter((x) => x === null).length === 1 && value !== null) {
+      const indexAdd = newSymbols.findIndex((item) => item === null);
+
+      const forms = countForms(newSymbols);
+      const lastSymbol = [];
+      while (forms.square < 2) {
+        lastSymbol.push('square');
+        forms.square = forms.square + 1;
+      }
+      while (forms.circle < 2) {
+        lastSymbol.push('circle');
+        forms.circle = forms.circle + 1;
+      }
+      while (forms.triangle < 2) {
+        lastSymbol.push('triangle');
+        forms.triangle = forms.triangle + 1;
+      }
+
+      newSymbols[indexAdd] = checkForm3d(lastSymbol);
+    }
+    setSymbols(newSymbols);
+  };
+
+  const setPseudoIndex = (index, value) => {
+    const newPseudos = [...pseudos];
+    newPseudos[index] = value;
+    setPseudos(newPseudos);
+  };
+
+  const errorFormat = () => {
+    return (
+      <Box sx={{ color: 'red' }}>
+        <br />
+        {language === 'us'
+          ? 'WARNING: YOUR CONFIGURATION IS NOT POSSIBLE !'
+          : "ATTENTION: VOTRE CONFIGURATION N'EST PAS POSSIBLE !"}
+      </Box>
+    );
+  };
+
+  const forms = countForms(symbols);
 
   const alert = () => {
     if (!symbols[0] || !symbols[1] || !symbols[2]) return;
@@ -369,20 +511,66 @@ const Dissection = ({ language, statues, resetValue }) => {
   };
 
   return (
-    <Card sx={{ textAlign: 'center', width: 'fit-content', margin: 'auto', mt: 2 }}>
+    <Card
+      sx={{
+        textAlign: 'center',
+        width: '100%',
+        margin: 'auto',
+        mt: 2,
+        backgroundColor: symbols[0] && symbols[1] && symbols[2] ? 'success.blur' : 'rgba(1,1,1,0.1)'
+      }}
+    >
       <h3>{language === 'us' ? 'Dissection Room' : 'Salle de dissection'}</h3>
       {language === 'us'
         ? 'Name the 3 geometric shapes you see on the statues'
         : 'Donner les 3 figures géométrique que vous voyez sur les statues'}
       <br />
       <br />
-      <Stack direction="row" spacing={2} sx={{ justifyContent: 'center' }}>
-        <Symbol index={0} data={symbols[0]} setData={(value) => setSymbolsIndex(0, value)} />
-        <Symbol index={1} data={symbols[1]} setData={(value) => setSymbolsIndex(1, value)} />
-        <Symbol index={2} data={symbols[2]} setData={(value) => setSymbolsIndex(2, value)} />
-      </Stack>
+      <Grid item container spacing={2} sx={{ justifyContent: 'center' }}>
+        <Grid item md={4}>
+          <Symbol
+            index={0}
+            data={symbols[0]}
+            setData={(value) => setSymbolsIndex(0, value)}
+            forms={forms}
+            pseudo={pseudos[0]}
+            setPseudo={(event) => setPseudoIndex(0, event.target.value)}
+            triumphMode={triumphMode}
+          />
+        </Grid>
+        <Grid item md={4}>
+          <Symbol
+            index={1}
+            data={symbols[1]}
+            setData={(value) => setSymbolsIndex(1, value)}
+            forms={forms}
+            pseudo={pseudos[1]}
+            setPseudo={(event) => setPseudoIndex(1, event.target.value)}
+            triumphMode={triumphMode}
+          />
+        </Grid>
+        <Grid item md={4}>
+          <Symbol
+            index={2}
+            data={symbols[2]}
+            setData={(value) => setSymbolsIndex(2, value)}
+            forms={forms}
+            pseudo={pseudos[2]}
+            setPseudo={(event) => setPseudoIndex(2, event.target.value)}
+            triumphMode={triumphMode}
+          />
+        </Grid>
+      </Grid>
       {alert()}
-      <Solution language={language} symbols={symbols} statues={statues} forms={forms} />
+      <Solution
+        language={language}
+        symbols={symbols}
+        statues={statues}
+        forms={forms}
+        triumphMode={triumphMode}
+        setTriumphModeData={setTriumphModeData}
+        pseudos={pseudos}
+      />
     </Card>
   );
 };
