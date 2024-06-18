@@ -13,6 +13,7 @@ const ViewSymbol = ({ symbol, sx }) => {
   if (symbol === 'circle') return <CircleIcon sx={sx} height={25} />;
   if (symbol === 'triangle') return <Icon icon="mdi:triangle" style={sx} height={25} />;
   if (symbol === 'square') return <SquareIcon sx={sx} height={25} />;
+  return <Box />;
 };
 
 const countForms = (symbols, symbols2) => {

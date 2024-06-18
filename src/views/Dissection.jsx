@@ -38,7 +38,7 @@ const ViewSymbol = ({ symbol, sx = { height: 25 } }) => {
   if (symbol === 'circle') return <CircleIcon sx={sx} />;
   if (symbol === 'triangle') return <Icon icon="mdi:triangle" style={sx} height={sx.height} />;
   if (symbol === 'square') return <SquareIcon sx={sx} />;
-  return null;
+  return <Box />;
 };
 
 const Symbol = ({ index, data, setData, forms, pseudo, setPseudo, triumphMode }) => {
