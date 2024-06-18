@@ -22,7 +22,7 @@ const ViewSymbol = ({ symbol, sx = { height: 25 } }) => {
 const rearrangeArray = (arr, indexSymbol) => {
   const symbolMap = {};
   arr.forEach((item) => {
-    if (!symbolMap[item[indexSymbol].from]) {
+    if (!symbolMap[item[indexSymbol]?.from]) {
       symbolMap[item[indexSymbol].from] = [];
     }
     symbolMap[item[indexSymbol].from].push(item);
@@ -84,6 +84,10 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
     !triumphMode ||
     !triumphModeData ||
     !triumphModeData.solo ||
+    triumphModeData.solo.length < 3 ||
+    !triumphModeData.solo[0].data ||
+    !triumphModeData.solo[1].data ||
+    !triumphModeData.solo[2].data ||
     !triumphModeData.dissection ||
     !triumphModeData.dissection.solution ||
     !statues[0] ||

@@ -47,13 +47,13 @@ const Solution = ({
   const [others, setOthers] = useState(null);
 
   useEffect(() => {
-    if (triumphMode && others) {
+    if (triumphMode && others && solutions) {
       setTriumphModeData([{ data: solutions, your }, others[0], others[1]]);
     }
   }, [triumphMode]);
 
   useEffect(() => {
-    if (triumphMode && others) {
+    if (triumphMode && others && solutions) {
       setTriumphModeData([{ data: solutions, your }, others[0], others[1]]);
     }
   }, [solutions]);
