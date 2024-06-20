@@ -20,7 +20,8 @@ const parseDirection = (direction, language) => {
 const getStatueDirection = (direction, statues) => {
   if (direction === 'left') return statues[0];
   if (direction === 'right') return statues[2];
-  return statues[1];
+  if (direction === 'middle') return statues[1];
+  return 'none';
 };
 
 const ViewSymbol = ({ symbol, sx = { height: 25 } }) => {
@@ -158,19 +159,27 @@ const TriumphModeSolution = ({
       pseudo: getPseudo(item.your)
     }));
 
-    let first = rearrangeArray(solo, 1);
-    let second = rearrangeArray(solo, 2);
+    let first = rearrangeArray(solo, 1).map((item) => {
+      return { ...item, ...item[1] };
+    });
+    let second = rearrangeArray(solo, 2).map((item) => {
+      return { ...item, ...item[2] };
+    });
 
     if (
-      getStatueDirection(lastStatueClicked, statues) === first[0][1].from &&
-      getStatueDirection(lastStatueClicked, statues) === second[0][1].from
+      getStatueDirection(lastStatueClicked, statues) === first[0].from &&
+      getStatueDirection(lastStatueClicked, statues) === second[0].from
     ) {
       const tmp = { ...first[0] };
 
       first[0] = first[2];
       first[2] = tmp;
-    } else if (getStatueDirection(lastStatueClicked, statues) === first[0][1].from) {
+
+      console.log('a', getStatueDirection(lastStatueClicked, statues), first[0].from, second[0].from);
+    } else if (getStatueDirection(lastStatueClicked, statues) === first[0].from) {
       const tmp = [first[0], first[1], first[2]];
+
+      console.log('b');
 
       first[0] = second[0];
       first[1] = second[1];
@@ -182,7 +191,7 @@ const TriumphModeSolution = ({
 
     let value = rearrangeArraySymbol(triumphModeData.dissection.solution.steps);
 
-    if (second[2][2].from === getStatueDirection(value[0].statue, statues)) {
+    if (second[2].from === getStatueDirection(value[0].statue, statues)) {
       const copy = [...value];
 
       copy[0] = value[1];
@@ -244,8 +253,8 @@ const TriumphModeSolution = ({
           return (
             <Box key={index}>
               {step} {index + 1} : <Pseudo>{item.pseudo}</Pseudo> {take}{' '}
-              <ViewSymbol sx={{ color: 'green', height: 25 }} symbol={item[1].to} /> {knight} {dunk}{' '}
-              <ViewSymbol sx={{ color: '#880202', height: 25 }} symbol={item[1].from} />
+              <ViewSymbol sx={{ color: 'green', height: 25 }} symbol={item.to} /> {knight} {dunk}{' '}
+              <ViewSymbol sx={{ color: '#880202', height: 25 }} symbol={item.from} />
             </Box>
           );
         })}
@@ -258,8 +267,8 @@ const TriumphModeSolution = ({
           return (
             <Box key={index}>
               {step} {index + 4} : <Pseudo>{item.pseudo}</Pseudo> {take}{' '}
-              <ViewSymbol sx={{ color: 'green', height: 25 }} symbol={item[2].to} /> {knight} {dunk}{' '}
-              <ViewSymbol sx={{ color: '#880202', height: 25 }} symbol={item[2].from} />
+              <ViewSymbol sx={{ color: 'green', height: 25 }} symbol={item.to} /> {knight} {dunk}{' '}
+              <ViewSymbol sx={{ color: '#880202', height: 25 }} symbol={item.from} />
             </Box>
           );
         })}
