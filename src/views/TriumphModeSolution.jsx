@@ -64,11 +64,17 @@ const rearrangeArraySymbol = (arr) => {
         pos = 1;
       }
       result[pos] = obj;
+      result[pos].index = pos;
       pos += 2;
     });
   });
 
-  return result;
+  return result.sort((a, b) => {
+    if (a.index >= 2 && b.index >= 2 && result[a.index - 1].statue === result[a.index - 2].statue) {
+      return b.index - a.index;
+    }
+    return a.index - b.index;
+  });
 };
 
 const Pseudo = ({ children }) => {
