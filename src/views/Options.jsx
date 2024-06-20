@@ -1,6 +1,17 @@
-import { Box, Button, Card, FormControlLabel, FormGroup, Stack, Switch, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  FormControlLabel,
+  FormGroup,
+  MenuItem,
+  Select,
+  Stack,
+  Switch,
+  Typography
+} from '@mui/material';
 
-const Options = ({ reset, language, triumphMode, setTriumphMode }) => {
+const Options = ({ reset, language, triumphMode, setTriumphMode, lastStatueClicked, setLastStatueClicked }) => {
   const triumphModeAdvices = () => {
     if (language === 'fr')
       return (
@@ -57,6 +68,28 @@ const Options = ({ reset, language, triumphMode, setTriumphMode }) => {
         </FormGroup>
       </Stack>
       <Box sx={{ mt: 2 }}>{triumphMode ? triumphModeAdvices() : normalAdvices()}</Box>
+      {triumphMode && (
+        <Box sx={{ mt: 2 }}>
+          <Typography color={'tertiary'} variant="h7">
+            {language === 'fr'
+              ? "Derniere statue activé (ne rien mettre si c'est votre 1er cycle)"
+              : 'Last statue activated (leave blank if this is your 1st cycle)'}
+          </Typography>
+          <br />
+          <Select
+            value={lastStatueClicked}
+            onChange={(event) => setLastStatueClicked(event.target.value)}
+            sx={{ mt: 2 }}
+          >
+            <MenuItem default value={'none'}>
+              {language === 'fr' ? 'Aucune' : 'None'}
+            </MenuItem>
+            <MenuItem value={'left'}>{language === 'fr' ? 'Gauche' : 'Left'}</MenuItem>
+            <MenuItem value={'right'}>{language === 'fr' ? 'Droite' : 'Right'}</MenuItem>
+            <MenuItem value={'middle'}>{language === 'fr' ? 'Millieu' : 'Middle'}</MenuItem>
+          </Select>
+        </Box>
+      )}
     </Card>
   );
 };

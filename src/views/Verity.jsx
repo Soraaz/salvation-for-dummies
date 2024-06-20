@@ -11,10 +11,15 @@ const Verity = ({ language }) => {
   const [resetValue, setResetValue] = useState(false);
   const [triumphMode, setTriumphMode] = useState(false);
   const [triumphModeData, setTriumphModeData] = useState({});
+  const [lastStatueClicked, setLastStatueClicked] = useState('none');
+  const [lastStatueClickedByAlgo, setLastStatueClickedByAlgo] = useState('none');
 
   const reset = () => {
     setStatues([null, null, null]);
     setResetValue(true);
+    setLastStatueClicked(lastStatueClickedByAlgo);
+    setLastStatueClickedByAlgo('none');
+    setTriumphModeData({});
   };
 
   useEffect(() => {
@@ -29,7 +34,14 @@ const Verity = ({ language }) => {
     <Box width={'100%'}>
       <Grid item container spacing={2} sx={{ pl: 2, pr: 2 }}>
         <Grid item md={12} width={'100%'}>
-          <Options reset={reset} language={language} triumphMode={triumphMode} setTriumphMode={setTriumphMode} />
+          <Options
+            reset={reset}
+            language={language}
+            triumphMode={triumphMode}
+            setTriumphMode={setTriumphMode}
+            lastStatueClicked={lastStatueClicked}
+            setLastStatueClicked={setLastStatueClicked}
+          />
         </Grid>
         <Grid item md={4} width={'100%'}>
           <Statues statues={statues} setStatues={setStatues} language={language} resetValue={resetValue} />
@@ -58,6 +70,8 @@ const Verity = ({ language }) => {
             triumphMode={triumphMode}
             language={language}
             statues={statues}
+            setLastStatueClickedByAlgo={setLastStatueClickedByAlgo}
+            lastStatueClicked={lastStatueClicked}
           />
         </Grid>
       </Grid>

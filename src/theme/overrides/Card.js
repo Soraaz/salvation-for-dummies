@@ -2,6 +2,30 @@
 
 export default function Card(theme, darkMode) {
   return {
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          color: theme.palette.text.primary,
+          background: 'rgba(1,1,1,0.1)',
+          backdropFilter: 'blur(100px)',
+          boxShadow: '20px 20px 40px -6px rgba(0,0,0,0.2)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '20px'
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          color: theme.palette.text.primary,
+          background: 'rgba(1,1,1,0.1)',
+          backdropFilter: 'blur(100px)',
+          boxShadow: '20px 20px 40px -6px rgba(0,0,0,0.2)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '20px'
+        }
+      }
+    },
     MuiCard: {
       styleOverrides: {
         root: {

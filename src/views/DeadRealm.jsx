@@ -41,10 +41,18 @@ const Solution = ({
   your2,
   symbols2,
   triumphMode,
-  setTriumphModeData
+  setTriumphModeData,
+  resetValue
 }) => {
   const [solutions, setSolutions] = useState(null);
   const [others, setOthers] = useState(null);
+
+  useEffect(() => {
+    if (resetValue) {
+      setSolutions(null);
+      setOthers(null);
+    }
+  }, [resetValue]);
 
   useEffect(() => {
     if (triumphMode && others && solutions) {
@@ -586,6 +594,7 @@ const DeadRealm = ({ language, statues, resetValue, triumphMode, setTriumphModeD
         your2={your2}
         triumphMode={triumphMode}
         setTriumphModeData={setTriumphModeData}
+        resetValue={resetValue}
       />
     </Card>
   );

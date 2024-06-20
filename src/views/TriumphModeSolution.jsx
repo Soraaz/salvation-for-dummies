@@ -1,10 +1,27 @@
-import { Box, Card, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
+import { Box, Card, Grid, Typography, useMediaQuery } from '@mui/material';
 import { Icon } from '@iconify/react';
 import CircleIcon from '@mui/icons-material/Circle';
 import SquareIcon from '@mui/icons-material/Square';
 import StatueIconPng from '../assets/statue.png';
+import { useEffect, useState } from 'react';
 
 const StatueIcon = () => <img src={StatueIconPng} alt="Statue" height={42} width={32} />;
+
+const parseDirection = (direction, language) => {
+  const left = language === 'us' ? 'LEFT  statue' : 'de GAUCHE';
+  const right = language === 'us' ? 'RIGHT statue' : 'de DROITE';
+  const middle = language === 'us' ? 'MIDDLE statue' : 'du MILLIEU';
+
+  if (direction === 'left') return left;
+  if (direction === 'right') return right;
+  return middle;
+};
+
+const getStatueDirection = (direction, statues) => {
+  if (direction === 'left') return statues[0];
+  if (direction === 'right') return statues[2];
+  return statues[1];
+};
 
 const ViewSymbol = ({ symbol, sx = { height: 25 } }) => {
   if (symbol === 'cylinder') return <Icon icon="mdi:cylinder" style={sx} />;
@@ -85,22 +102,18 @@ const Pseudo = ({ children }) => {
   );
 };
 
-const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }) => {
-  if (
-    !triumphMode ||
-    !triumphModeData ||
-    !triumphModeData.solo ||
-    triumphModeData.solo.length < 3 ||
-    !triumphModeData.solo[0].data ||
-    !triumphModeData.solo[1].data ||
-    !triumphModeData.solo[2].data ||
-    !triumphModeData.dissection ||
-    !triumphModeData.dissection.solution ||
-    !statues[0] ||
-    !statues[1] ||
-    !statues[2]
-  )
-    return null;
+const TriumphModeSolution = ({
+  triumphMode,
+  triumphModeData,
+  language,
+  statues,
+  setLastStatueClickedByAlgo,
+  lastStatueClicked
+}) => {
+  const [lastPartSort, setLastPartSort] = useState(null);
+  const [firstPartSort, setFirstPartSort] = useState(null);
+  const [secondPartSort, setSecondPartSort] = useState(null);
+  const [soloData, setSoloData] = useState(null);
 
   const getPseudo = (symbol) => {
     if (statues[0] === symbol) return triumphModeData.dissection.pseudos[0];
@@ -119,18 +132,97 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
     if (your === 'square') return ['circle', 'triangle'];
   };
 
-  let soloData = [getDataFromStatue(statues[0]), getDataFromStatue(statues[1]), getDataFromStatue(statues[2])];
+  useEffect(() => {
+    if (
+      !triumphMode ||
+      !triumphModeData ||
+      !triumphModeData.solo ||
+      triumphModeData.solo.length < 3 ||
+      !triumphModeData.solo[0].data ||
+      !triumphModeData.solo[1].data ||
+      !triumphModeData.solo[2].data ||
+      !triumphModeData.dissection ||
+      !triumphModeData.dissection.solution ||
+      !statues[0] ||
+      !statues[1] ||
+      !statues[2]
+    )
+      return setLastPartSort(null);
 
-  soloData = soloData.map((item, index) => ({
-    ...item.data,
-    index: index,
-    your: item.your,
-    pseudo: getPseudo(item.your)
-  }));
+    let solo = [getDataFromStatue(statues[0]), getDataFromStatue(statues[1]), getDataFromStatue(statues[2])];
 
-  const firstPageSort = rearrangeArray(soloData, 1);
-  const secondPartSort = rearrangeArray(soloData, 2);
-  let lastPartSort = rearrangeArraySymbol(triumphModeData.dissection.solution.steps);
+    solo = solo.map((item, index) => ({
+      ...item.data,
+      index: index,
+      your: item.your,
+      pseudo: getPseudo(item.your)
+    }));
+
+    let first = rearrangeArray(solo, 1);
+    let second = rearrangeArray(solo, 2);
+
+    if (
+      getStatueDirection(lastStatueClicked, statues) === first[0][1].from &&
+      getStatueDirection(lastStatueClicked, statues) === second[0][1].from
+    ) {
+      const tmp = { ...first[0][1] };
+
+      first[0][1] = first[2][1];
+      first[2][1] = tmp;
+    } else if (getStatueDirection(lastStatueClicked, statues) === first[0][1].from) {
+      const tmp = [first[0][1], first[1][1], first[2][1]];
+
+      first[0][1] = second[0][2];
+      first[1][1] = second[1][2];
+      first[2][1] = second[2][2];
+      second[0][2] = tmp[0];
+      second[1][2] = tmp[1];
+      second[2][2] = tmp[2];
+    }
+
+    let value = rearrangeArraySymbol(triumphModeData.dissection.solution.steps);
+
+    if (second[2][2].from === getStatueDirection(value[0].statue, statues)) {
+      const copy = [...value];
+
+      copy[0] = value[1];
+      copy[1] = value[0];
+      if (value.length > 2) {
+        copy[2] = value[3];
+        copy[3] = value[2];
+      }
+      if (value.length > 4) {
+        copy[4] = value[5];
+        copy[5] = value[4];
+      }
+      value = copy;
+    }
+
+    setFirstPartSort(first);
+    setSecondPartSort(second);
+    setLastPartSort(value);
+    setSoloData(solo);
+    setLastStatueClickedByAlgo(value[value.length - 1].statue);
+  }, [triumphMode, triumphModeData, statues, lastStatueClicked]);
+
+  if (
+    !triumphMode ||
+    !triumphModeData ||
+    !triumphModeData.solo ||
+    triumphModeData.solo.length < 3 ||
+    !triumphModeData.solo[0].data ||
+    !triumphModeData.solo[1].data ||
+    !triumphModeData.solo[2].data ||
+    !triumphModeData.dissection ||
+    !triumphModeData.dissection.solution ||
+    !statues[0] ||
+    !statues[1] ||
+    !statues[2] ||
+    !firstPartSort ||
+    !secondPartSort ||
+    !lastPartSort
+  )
+    return null;
 
   const TextSolution = () => {
     const step = language === 'us' ? 'Step' : 'Etape';
@@ -139,9 +231,6 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
     const dunk2 = language === 'us' ? 'Place the' : 'Dépose le symbole';
     const knight = language === 'us' ? 'at knight' : 'sur un chevalier';
     const atStatue = language === 'us' ? 'symbol on the' : 'sur la statue';
-    const left = language === 'us' ? 'LEFT  statue' : 'de GAUCHE';
-    const right = language === 'us' ? 'RIGHT statue' : 'de DROITE';
-    const middle = language === 'us' ? 'MIDDLE statue' : 'du MILLIEU';
     const and = language === 'us' ? 'and' : 'et le';
     const knights = language === 'us' ? 'at knights' : 'sur les chevalier';
     const end =
@@ -149,37 +238,9 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
         ? 'and pass the mirror with these two symbols !'
         : 'et passer le miroir avec ces deux symboles !';
 
-    const parseDirection = (direction) => {
-      if (direction === 'left') return left;
-      if (direction === 'right') return right;
-      return middle;
-    };
-
-    const getStatueDirection = (direction) => {
-      if (direction === 'left') return statues[0];
-      if (direction === 'right') return statues[2];
-      return statues[1];
-    };
-
-    if (secondPartSort[2][2].from === getStatueDirection(lastPartSort[0].statue)) {
-      const copy = [...lastPartSort];
-
-      copy[0] = lastPartSort[1];
-      copy[1] = lastPartSort[0];
-      if (lastPartSort.length > 2) {
-        copy[2] = lastPartSort[3];
-        copy[3] = lastPartSort[2];
-      }
-      if (lastPartSort.length > 4) {
-        copy[4] = lastPartSort[5];
-        copy[5] = lastPartSort[4];
-      }
-      lastPartSort = copy;
-    }
-
     const firstPart = (
       <Box>
-        {firstPageSort.map((item, index) => {
+        {firstPartSort.map((item, index) => {
           return (
             <Box key={index}>
               {step} {index + 1} : <Pseudo>{item.pseudo}</Pseudo> {take}{' '}
@@ -236,7 +297,7 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
           <Box key={index}>
             {step} {index + 7} : <Pseudo>{language === 'fr' ? 'Salle de dissection' : 'Dissect Room'}</Pseudo> {dunk2}{' '}
             <ViewSymbol sx={{ color: 'green', fontSize: '24px' }} symbol={item.symbol} /> {atStatue}{' '}
-            <b>{parseDirection(item.statue)}</b>
+            <b>{parseDirection(item.statue, language)}</b>
           </Box>
         ))}
       </Box>
@@ -253,7 +314,7 @@ const TriumphModeSolution = ({ triumphMode, triumphModeData, language, statues }
             <b>You can perform the following steps during dissection:</b>
           </Typography>
         )}
-        {firstPageSort.map((item, index) => {
+        {firstPartSort.map((item, index) => {
           return (
             <Box key={index}>
               <Pseudo>{item.pseudo}</Pseudo> : {take}{' '}

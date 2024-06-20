@@ -121,6 +121,7 @@ const Symbol = ({ index, data, setData, forms, pseudo, setPseudo, triumphMode })
         )}
       </Box>
       <StatueIcon />
+      <br />
       {triumphMode && <TextField value={pseudo} onChange={setPseudo} label={'Pseudo'} sx={{ mt: 2 }} />}
     </Box>
   );
