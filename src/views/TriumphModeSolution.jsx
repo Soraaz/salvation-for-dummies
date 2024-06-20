@@ -165,19 +165,19 @@ const TriumphModeSolution = ({
       getStatueDirection(lastStatueClicked, statues) === first[0][1].from &&
       getStatueDirection(lastStatueClicked, statues) === second[0][1].from
     ) {
-      const tmp = { ...first[0][1] };
+      const tmp = { ...first[0] };
 
-      first[0][1] = first[2][1];
-      first[2][1] = tmp;
+      first[0] = first[2];
+      first[2] = tmp;
     } else if (getStatueDirection(lastStatueClicked, statues) === first[0][1].from) {
-      const tmp = [first[0][1], first[1][1], first[2][1]];
+      const tmp = [first[0], first[1], first[2]];
 
-      first[0][1] = second[0][2];
-      first[1][1] = second[1][2];
-      first[2][1] = second[2][2];
-      second[0][2] = tmp[0];
-      second[1][2] = tmp[1];
-      second[2][2] = tmp[2];
+      first[0] = second[0];
+      first[1] = second[1];
+      first[2] = second[2];
+      second[0] = tmp[0];
+      second[1] = tmp[1];
+      second[2] = tmp[2];
     }
 
     let value = rearrangeArraySymbol(triumphModeData.dissection.solution.steps);
