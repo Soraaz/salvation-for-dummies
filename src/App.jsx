@@ -21,7 +21,7 @@ function App() {
         <Box sx={{ display: 'flex' }}>
           <img src={Logo} alt="Salvation for dummies" height={50} />
           <LanguageSwitch language={language} setLanguage={setLanguage} />
-          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.0</Button>
+          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.1</Button>
           <Modal open={openVersionPopup} onClose={() => setOpenVersionPopup(!openVersionPopup)}>
             <Card
               sx={{
@@ -34,7 +34,7 @@ function App() {
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              Patchnote 2.0
+              Patchnote 2.1
               <br />
               <br />
               Global:
