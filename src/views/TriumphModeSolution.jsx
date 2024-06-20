@@ -175,11 +175,12 @@ const TriumphModeSolution = ({
       first[0] = first[2];
       first[2] = tmp;
 
-      console.log('a', getStatueDirection(lastStatueClicked, statues), first[0].from, second[0].from);
+      const tmp2 = { ...second[0] };
+
+      second[0] = second[2];
+      second[2] = tmp2;
     } else if (getStatueDirection(lastStatueClicked, statues) === first[0].from) {
       const tmp = [first[0], first[1], first[2]];
-
-      console.log('b');
 
       first[0] = second[0];
       first[1] = second[1];
