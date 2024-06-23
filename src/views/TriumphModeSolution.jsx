@@ -166,6 +166,13 @@ const TriumphModeSolution = ({
       return { ...item, ...item[2] };
     });
 
+    if (first[2].from === second[0].from) {
+      const tmp = { ...first[0] };
+
+      first[0] = first[2];
+      first[2] = tmp;
+    }
+
     if (
       getStatueDirection(lastStatueClicked, statues) === first[0].from &&
       getStatueDirection(lastStatueClicked, statues) === second[0].from

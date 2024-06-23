@@ -21,7 +21,7 @@ function App() {
         <Box sx={{ display: 'flex' }}>
           <img src={Logo} alt="Salvation for dummies" height={50} />
           <LanguageSwitch language={language} setLanguage={setLanguage} />
-          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.1</Button>
+          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.3</Button>
           <Modal open={openVersionPopup} onClose={() => setOpenVersionPopup(!openVersionPopup)}>
             <Card
               sx={{
@@ -34,19 +34,12 @@ function App() {
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              Patchnote 2.1
+              Patchnote 2.3
               <br />
               <br />
               Global:
-              <br />
-              - Totally responsive on phone
-              <br /> - Change UX for more user friendly interface
-              <br /> - Add prepattern for every forms
-              <br /> - Lock impossible patterns
-              <br /> - Show only the selected form
-              <br /> - Allow to unselect forms 2D/3D
-              <br /> - Reset caches react with new version to resolve conflict with old algorithm
-              <br /> - Add triumph mode
+              <br />- Adding squad viewer
+              <br /> - New cache systems
             </Card>
           </Modal>
         </Box>

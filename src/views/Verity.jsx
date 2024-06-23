@@ -5,6 +5,7 @@ import DeadRealm from './DeadRealm';
 import Dissection from './Dissection';
 import Options from './Options';
 import TriumphModeSolution from './TriumphModeSolution';
+import SquadViewer from './SquadViewer';
 
 const Verity = ({ language }) => {
   const [statues, setStatues] = useState([null, null, null]);
@@ -33,6 +34,9 @@ const Verity = ({ language }) => {
   return (
     <Box width={'100%'}>
       <Grid item container spacing={2} sx={{ pl: 2, pr: 2 }}>
+        <Grid item md={12} width={'100%'}>
+          <SquadViewer language={language} />
+        </Grid>
         <Grid item md={12} width={'100%'}>
           <Options
             reset={reset}
