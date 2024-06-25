@@ -193,7 +193,7 @@ const SquadViewer = ({ language }) => {
   const getDestinyInventory = async () => {
     try {
       const res = await axios.get(
-        'https://www.bungie.net/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b9042aab-bb85-47e6-9d32-bd7343e3a6c2.json'
+        'https://www.bungie.net/common/destiny2_content/json/en/DestinyInventoryItemDefinition-c2aab5db-09a6-4170-85dd-91599475546b.json'
       );
       setDestinyInventory(res.data);
     } catch (e) {}
