@@ -87,7 +87,11 @@ const Character = ({ language, user, equipments, inventory }) => {
           <Typography color={'primary'} sx={{ position: 'absolute', top: '50%', left: '20%' }}>
             {getClass(language, activeCharacter.classType)}
           </Typography>
-          <img alt="emblem" src={'https://www.bungie.net' + emblem_path} style={{ width: '100%', height: width / 5.5 }} />
+          <img
+            alt="emblem"
+            src={'https://www.bungie.net' + emblem_path}
+            style={{ width: '100%', height: width / 5.5 }}
+          />
         </Box>
         <Box sx={{ width: '100%', height: width / 6 }}>
           {items
@@ -192,11 +196,20 @@ const SquadViewer = ({ language }) => {
 
   const getDestinyInventory = async () => {
     try {
+      const resManifest = await axios.get('https://www.bungie.net/Platform/Destiny2/Manifest/', {
+        headers: {
+          'X-API-Key': apiKey
+        }
+      });
       const res = await axios.get(
-        'https://www.bungie.net/common/destiny2_content/json/en/DestinyInventoryItemDefinition-c2aab5db-09a6-4170-85dd-91599475546b.json'
+        'https://www.bungie.net' +
+          resManifest.data.Response.jsonWorldComponentContentPaths.en.DestinyInventoryItemDefinition
       );
       setDestinyInventory(res.data);
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+      getDestinyInventory();
+    }
   };
 
   useEffect(() => {
