@@ -21,7 +21,7 @@ function App() {
         <Box sx={{ display: 'flex' }}>
           <img src={Logo} alt="Salvation for dummies" height={50} />
           <LanguageSwitch language={language} setLanguage={setLanguage} />
-          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.3</Button>
+          <Button onClick={() => setOpenVersionPopup(!openVersionPopup)}>Version 2.4</Button>
           <Modal open={openVersionPopup} onClose={() => setOpenVersionPopup(!openVersionPopup)}>
             <Card
               sx={{
