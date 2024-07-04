@@ -16,6 +16,33 @@ const checkForm = (form) => {
   return [];
 };
 
+const sortSolution = (solution) => {
+  const newSolution = [];
+  let swap = null;
+  let symbols = [];
+
+  for (const [index, item] of solution.entries()) {
+    if (swap) {
+      newSolution.push(item);
+      newSolution.push(swap);
+
+      symbols = [swap.symbol];
+      swap = null;
+    } else {
+      if (symbols.includes(item.symbol)) swap = item;
+      else if (index !== 0 && item.symbol === newSolution[index - 1].symbol) swap = item;
+      else {
+        symbols.push(item.symbol);
+
+        if (symbols.length === 3) symbols = [];
+        newSolution.push(item);
+      }
+    }
+  }
+
+  return newSolution;
+};
+
 const checkForm3d = (form) => {
   if (form.includes('triangle') && form.includes('square')) return 'prism';
   if (form.includes('triangle') && form.includes('circle')) return 'cone';
@@ -395,23 +422,12 @@ const Solution = ({ language, statues, symbols, forms, triumphMode, setTriumphMo
 
     return (
       <Box sx={{ textAlign: 'left' }}>
-        {solution.steps
-          .map((item, index) => ({ ...item, index: index }))
-          .sort((a, b) => {
-            if (b.index !== 0 && b.symbol === solution.steps[b.index - 1].symbol) return b.index - a.index;
-            if (
-              b.index === 2 &&
-              (b.symbol === solution.steps[b.index - 1].symbol || b.symbol === solution.steps[b.index - 2].symbol)
-            )
-              return b.index - a.index;
-            return a.index - b.index;
-          })
-          .map((item, index) => (
-            <Box key={index}>
-              {step} {index + 1}: {dunk} <ViewSymbol sx={{ color: 'green', fontSize: '24px' }} symbol={item.symbol} />{' '}
-              {atStatue} <b>{parseDirection(item.statue)}</b>
-            </Box>
-          ))}
+        {sortSolution(solution.steps).map((item, index) => (
+          <Box key={index + item}>
+            {step} {index + 1}: {dunk} <ViewSymbol sx={{ color: 'green', fontSize: '24px' }} symbol={item.symbol} />{' '}
+            {atStatue} <b>{parseDirection(item.statue)}</b>
+          </Box>
+        ))}
       </Box>
     );
   };

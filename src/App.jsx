@@ -34,12 +34,14 @@ function App() {
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              Patchnote 2.3
+              Patchnote 2.4
               <br />
               <br />
               Global:
-              <br />- Adding squad viewer
-              <br /> - New cache systems
+              <br />- Fix a bug on firefox who use a sorting system broken who not create optimal dissection and create
+              bad pattern for triumph mode
+              <br /> - Change the user name in the Squad Viewer to show Bungie Name and not Steam Name
+              <br /> - Improve UX for Squad Viewer
             </Card>
           </Modal>
         </Box>

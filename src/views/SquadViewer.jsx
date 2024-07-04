@@ -1,6 +1,9 @@
 import { Box, Button, Card, CircularProgress, Grid, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import TitanIcon from '../assets/titan.svg';
+import HuntIcon from '../assets/hunter.svg';
+import WarlockIcon from '../assets/warlock.svg';
 
 const apiKey = 'ebab377033064ed6a4e081aec532d34d';
 const splitText = (text) => {
@@ -63,6 +66,46 @@ const getClass = (language, classID) => {
   return language === 'fr' ? 'Arcaniste' : 'Warlock';
 };
 
+const getClassColor = (classID) => {
+  if (classID === 0) return '#f53543';
+  if (classID === 1) return '#006da6';
+  return '#f9ad00';
+};
+
+const getClassIcon = (classID, size = 44) => {
+  if (classID === 0)
+    return (
+      <img
+        src={TitanIcon}
+        style={{ filter: 'invert(34%) sepia(56%) saturate(6622%) hue-rotate(340deg) brightness(103%) contrast(92%)' }}
+        alt="Titan"
+        height={size}
+        width={size}
+      />
+    );
+  if (classID === 1)
+    return (
+      <img
+        src={HuntIcon}
+        style={{
+          filter: 'invert(28%) sepia(34%) saturate(3948%) hue-rotate(192deg) brightness(98%) contrast(80%)'
+        }}
+        alt="Hunter"
+        height={size}
+        width={size}
+      />
+    );
+  return (
+    <img
+      src={WarlockIcon}
+      style={{ filter: 'invert(70%) sepia(82%) saturate(2647%) hue-rotate(357deg) brightness(107%) contrast(112%)' }}
+      alt="Warlock"
+      height={size}
+      width={size}
+    />
+  );
+};
+
 const Character = ({ language, user, equipments, inventory }) => {
   const componentRef = useRef();
   const { width, height } = useContainerDimensions(componentRef);
@@ -77,16 +120,48 @@ const Character = ({ language, user, equipments, inventory }) => {
   );
 
   const emblem_path = activeCharacter?.emblemBackgroundPath;
+
   return (
     <Box sx={{ border: '2px solid #ff6550', width: '100%' }} ref={componentRef}>
       <Stack sx={{ flexDirection: 'column', justifyContent: 'center' }}>
         <Box sx={{ position: 'relative', textAlign: 'center', color: 'white', height: width / 5.5 }}>
-          <Typography color={'primary'} variant="h6" sx={{ position: 'absolute', top: '0%', left: '20%' }}>
-            {user.profile.data.userInfo.displayName}
+          <Typography
+            color={'white'}
+            variant="h4"
+            sx={{
+              position: 'absolute',
+              top: '0%',
+              left: '20%',
+              textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+            }}
+          >
+            {user.profile.data.userInfo.bungieGlobalDisplayName}
           </Typography>
-          <Typography color={'primary'} sx={{ position: 'absolute', top: '50%', left: '20%' }}>
+          <Typography
+            color={getClassColor(activeCharacter.classType)}
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '20%',
+              textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000'
+            }}
+          >
             {getClass(language, activeCharacter.classType)}
           </Typography>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '15%',
+              right: '5%',
+              fill: 'none',
+              stroke: '#646464',
+              strokeWidth: '1px',
+              strokeDasharray: '2,2',
+              strokeLinejoin: 'round'
+            }}
+          >
+            {getClassIcon(activeCharacter.classType, width / 8)}
+          </Box>
           <img
             alt="emblem"
             src={'https://www.bungie.net' + emblem_path}

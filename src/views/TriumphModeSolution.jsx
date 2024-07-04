@@ -5,6 +5,32 @@ import SquareIcon from '@mui/icons-material/Square';
 import StatueIconPng from '../assets/statue.png';
 import { useEffect, useState } from 'react';
 
+const sortSolution = (solution) => {
+  const newSolution = [];
+  let swap = null;
+  let symbols = [];
+
+  for (const [index, item] of solution.entries()) {
+    if (swap) {
+      newSolution.push(item);
+      newSolution.push(swap);
+
+      symbols = [swap.symbol];
+      swap = null;
+    } else {
+      if (symbols.includes(item.symbol)) swap = item;
+      else if (index !== 0 && item.symbol === newSolution[index - 1].symbol) swap = item;
+      else {
+        symbols.push(item.symbol);
+
+        if (symbols.length === 3) symbols = [];
+        newSolution.push(item);
+      }
+    }
+  }
+
+  return newSolution;
+};
 const StatueIcon = () => <img src={StatueIconPng} alt="Statue" height={42} width={32} />;
 
 const parseDirection = (direction, language) => {
@@ -87,12 +113,7 @@ const rearrangeArraySymbol = (arr) => {
     });
   });
 
-  return result.sort((a, b) => {
-    if (a.index >= 2 && b.index >= 2 && result[a.index - 1].statue === result[a.index - 2].statue) {
-      return b.index - a.index;
-    }
-    return a.index - b.index;
-  });
+  return result;
 };
 
 const Pseudo = ({ children }) => {
@@ -217,7 +238,7 @@ const TriumphModeSolution = ({
 
     setFirstPartSort(first);
     setSecondPartSort(second);
-    setLastPartSort(value);
+    setLastPartSort(sortSolution(value));
     setSoloData(solo);
     setLastStatueClickedByAlgo(value[value.length - 1].statue);
   }, [triumphMode, triumphModeData, statues, lastStatueClicked]);
